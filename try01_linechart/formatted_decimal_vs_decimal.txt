@@ -8,7 +8,7 @@ Thing 2:  Yes
 Below Data Referenced to:Stuff
 
 
-        Latitude          Altitude
+       Independent       Dependent
          (deg)              (km)
        9.808158471     704.360915898
       13.431327551     704.094622611
