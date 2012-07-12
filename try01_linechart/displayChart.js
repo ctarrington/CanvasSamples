@@ -2,8 +2,9 @@ $(document).ready(function() {
 	
 	var config = {
 		graphset: [
-		{type: 'line',
-		   series: [{values: [5, 12, 18, 0, 10, 5]}]
+		{plot:{exact:true, decimals:4},
+		 type: 'line',
+		 series: [{"line-width":1, values: [5, 12, 18, 0, 10, 5]}]
 		}]
 	};
 	
@@ -15,8 +16,9 @@ $(document).ready(function() {
 		
 		for (var ctr=0;ctr<raw_values.length;ctr++)
 		{
-			values[ctr] = parseInt(raw_values[ctr], 10);
+			values[ctr] = parseFloat(raw_values[ctr], 10);
 		}
+
 		
 		console.log("values: "+values);
 		
