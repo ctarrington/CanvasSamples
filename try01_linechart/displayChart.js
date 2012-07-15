@@ -1,5 +1,12 @@
 $(document).ready(function() {
 	
+	var NUMERIC_DATA_REGEXP = /^\d+\.{0,1}\d+\s+/;
+	var SHORT_DATE_TIME_REGEXP = /^\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}(\.\d+){0,1}\s+/;
+	var LONG_DATE_TIME_REGEXP = /^^[a-zA-Z]{3}\s+\d{2}\s+\d{4}\s\d{2}:\d{2}:\d{2}(\.\d+){0,1}\s+/;
+	var SHORT_DATE_REGEXP = /^\d{2}\/\d{2}\/\d{4}\s+/;
+	var LONG_DATE_REGEXP = /^[a-zA-Z]{3}\s+\d{2}\s+\d{4}\s+/;		
+	var EXPRESSIONS = [NUMERIC_DATA_REGEXP, SHORT_DATE_TIME_REGEXP, LONG_DATE_TIME_REGEXP, SHORT_DATE_REGEXP, LONG_DATE_REGEXP];
+	
 	var configLine = {
 		graphset: [
 		{plot:{exact:true, decimals:4},
@@ -18,22 +25,97 @@ $(document).ready(function() {
 	
 	var config = configLine;
 	
-	function parseFormattedData(data)
+	
+	function isNumber(n) 
 	{
-		var HEADER_REGEXP = /^\w.*[\r\f\n]+$/;
+  		return !isNaN(parseFloat(n)) && isFinite(n);
+	}
+
+	function parseNextData(line)
+	{		
+		var match = null;
+		
+		for (var ctr=0;ctr<EXPRESSIONS.length;ctr++)
+		{
+			var matches = line.match(EXPRESSIONS[ctr]);
+			
+			if (matches) 
+			{
+				match = matches[0].trim();
+				break;
+			}
+		}
+				
+		return match;		
+	}
+	
+	function parseDataLine(line)
+	{
+		var dataForLine = [];
+		while (true)
+		{
+			line = line.trim() +' ';  // we need a space at the end of the line, as the regexps use the space as part of the match
+			var data = parseNextData(line);
+								
+			if (!data)
+			{
+				break;
+			}
+			else
+			{
+				line = line.substr(data.length);
+				if (isNumber(data))
+				{
+					data = parseFloat(data);
+				}
+				dataForLine.push(data);				
+			}				
+		}
+		
+		return dataForLine;
+	}
+	
+	function parseOutputFromFreeFlyer(data)
+	{
+		var DESCRIPTION_REGEXP = /^\S+/;
+		var COLUMN_HEADER_REGEXP = /^\s+[a-zA-Z]+/;
 		
 		var parsed = {};
-		parsed.headers = [];
+		parsed.descriptionLines = [];		
+		parsed.columnHeaderLines = [];
+		parsed.dataLines = [];
+		parsed.data = [];
 		
 		var lines = data.split("\n");		
 		for (var ctr=0; ctr<lines.length;ctr++)
 		{
-			var line = lines[ctr];	
-			var found = HEADER_REGEXP.test(line);	
-			if (found)
+			var line = lines[ctr];
+			
+			if (line.trim().length == 0)
 			{
-				parsed.headers.push(line.trim());
+				continue;
+			}	
+			
+			if (DESCRIPTION_REGEXP.test(line))
+			{
+				parsed.descriptionLines.push(line.trim());
+				continue;
 			}
+			
+			var dataForLine = parseDataLine(line);
+			if (dataForLine.length > 0) 
+			{
+				parsed.data.push(dataForLine);
+				continue;
+			}
+			
+			if (COLUMN_HEADER_REGEXP.test(line))
+			{
+				parsed.columnHeaderLines.push(line.trim());
+				continue;
+			}
+			
+			
 		}
 		
 		return parsed;
@@ -42,30 +124,10 @@ $(document).ready(function() {
 	
 	function processData(data)
 	{
-		var parsed_data = parseFormattedData(data);
+		var parsed = parseOutputFromFreeFlyer(data);
+		var data = parsed.data;
 		
-		console.log("data: "+data);
-		var raw_values = data.split(',');
-		var values = [];
-		
-		for (var ctr=0;ctr<raw_values.length;ctr++)
-		{
-			values[ctr] = parseFloat(raw_values[ctr], 10);
-		}
-
-		/*var interval = Math.PI/50;
-    	values = [];
-    	for (var ctr = 0; ctr < 2*100; ctr++) 
-    	{
-    		var y = 10 * Math.sin(ctr * interval) + 3 * Math.sin(ctr * interval * 4) + 1 * Math.sin(ctr * interval * 8);
-        	values[ctr] = [ctr, y];
-    	}*/
-    	
-    	//values = [[1,3], [2,5], [4,8], [1,7],[2,10]];
-		
-		console.log("values: "+values.join());
-		
-		config.graphset[0].series[0].values = values;
+		config.graphset[0].series[0].values = data;
 		
 		zingchart.render({
 			data : config,

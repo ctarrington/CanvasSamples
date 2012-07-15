@@ -1,4 +1,4 @@
-   Long DateTime vs decimal   from Maddy
+Long DateTime vs decimal   from Maddy
 Start Time:  Jun 27 2012 00:00:00.000
 End Time:  later
 Flavor:  Chocolate
