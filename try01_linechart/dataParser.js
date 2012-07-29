@@ -132,21 +132,20 @@ var dataParser = dataParser || {};
 		
 		var parsed = {};
 		parsed.xaxis = {};
-		parsed.yaxis = {};
+		parsed.xaxis.min = Number.MAX_VALUE;
+		parsed.xaxis.max = -Number.MAX_VALUE;
+		parsed.xaxis.dataType = null;
 		
+		parsed.sequences = [];
 		
 		parsed.descriptionLines = [];		
 		parsed.columnHeaderLines = [];
-		parsed.data = [];
-		
-		var minX = Number.MAX_VALUE;
-		var maxX = -Number.MAX_VALUE;
 		
 		
-		var lines = data.split("\n");		
-		for (var ctr=0; ctr<lines.length;ctr++)
+		var lines = data.split("\n");	
+		for (var line_ctr=0; line_ctr<lines.length;line_ctr++)
 		{
-			var line = lines[ctr];
+			var line = lines[line_ctr];
 			
 			if (line.trim().length == 0)
 			{
@@ -162,12 +161,26 @@ var dataParser = dataParser || {};
 			var dataForLine = parseDataLine(line);
 			if (dataForLine.values.length > 0) 
 			{
-				parsed.data.push(dataForLine.values);
-				parsed.xaxis.dataType = dataForLine.types[0];
-				parsed.yaxis.dataType = dataForLine.types[1];
+				parsed.xaxis.dataType = dataForLine.types[0];				
+				parsed.xaxis.min = Math.min(parsed.xaxis.min, dataForLine.values[0]);
+				parsed.xaxis.max = Math.max(parsed.xaxis.max, dataForLine.values[0]);
 				
-				minX = Math.min(minX, dataForLine.values[0]);
-				maxX = Math.max(maxX, dataForLine.values[0]);				
+				var xvalue = dataForLine.values[0];
+				
+				for (var ctr=1; ctr < dataForLine.values.length; ctr++)
+				{
+					if (!parsed.sequences[ctr-1])
+					{
+						parsed.sequences[ctr-1] = {};
+						parsed.sequences[ctr-1].dataPairs = [];
+					}
+					
+					var seq = parsed.sequences[ctr-1];
+					seq.dataPairs.push([xvalue, dataForLine.values[ctr]]);
+					seq.dataType = dataForLine.types[ctr];
+				}
+				
+							
 				continue;
 			}
 			
@@ -178,10 +191,6 @@ var dataParser = dataParser || {};
 			}			
 			
 		}
-		
-		
-		parsed.xaxis.min = minX;
-		parsed.xaxis.max = maxX;
 		
 		return parsed;
 	}

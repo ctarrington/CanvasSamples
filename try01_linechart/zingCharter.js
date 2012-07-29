@@ -96,17 +96,12 @@ var zingCharter = zingCharter || {};
 		graphsetTitle.text = params.plotTitle || "Default Title";
 		graphsetSubtitle.text = params.plotSubtitle || "";
 		
-		var data = parsedData.data;
-		
-		for (var series_ctr=0; series_ctr < data[0].length-1;series_ctr++)
+		var sequences = parsedData.sequences;
+		for (var sequence_ctr = 0; sequence_ctr < sequences.length; sequence_ctr++)
 		{
-			config.graphset[0].series[series_ctr] = {"line-width": 1};					
-			config.graphset[0].series[series_ctr].values = [];
+			config.graphset[0].series[sequence_ctr] = {"line-width": 1};
+			config.graphset[0].series[sequence_ctr].values = sequences[sequence_ctr].dataPairs;
 			
-			for (var row_ctr = 0; row_ctr < data.length; row_ctr++)
-			{
-				config.graphset[0].series[series_ctr].values[row_ctr] = [data[row_ctr][0], data[row_ctr][series_ctr+1]];
-			}			
 		}
 		
 		config.graphset[0]["scale-x"]["min-value"] = parsedData.xaxis.min;
@@ -116,9 +111,9 @@ var zingCharter = zingCharter || {};
 			config.graphset[0]["scale-x"].transform = DATATYPE_TO_TRANSFORM[parsedData.xaxis.dataType.name];
 		}
 		
-		if (parsedData.yaxis.dataType && DATATYPE_TO_TRANSFORM[parsedData.yaxis.dataType.name])
+		if (sequences[0].dataType && DATATYPE_TO_TRANSFORM[sequences[0].dataType.name])
 		{
-			config.graphset[0]["scale-y"].transform = DATATYPE_TO_TRANSFORM[parsedData.yaxis.dataType.name];
+			config.graphset[0]["scale-y"].transform = DATATYPE_TO_TRANSFORM[sequences[0].dataType.name];
 		}		
 		
 		zingchart.render({
