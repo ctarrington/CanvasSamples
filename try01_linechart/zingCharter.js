@@ -39,7 +39,8 @@ var zingCharter = zingCharter || {};
             "tooltip-text":"%v",
             "line-color":"#000000",
             "line-width":1,
-            "line-gap-size":0
+            "line-gap-size":0,
+            "decimals":2
     };
       
     var legend = {
@@ -101,7 +102,7 @@ var zingCharter = zingCharter || {};
 		{
 			config.graphset[0].series[sequence_ctr] = {"line-width": 1};
 			config.graphset[0].series[sequence_ctr].values = sequences[sequence_ctr].dataPairs;
-			
+			config.graphset[0].series[sequence_ctr].text = sequences[sequence_ctr].headers[0];
 		}
 		
 		config.graphset[0]["scale-x"]["min-value"] = parsedData.xaxis.min;
@@ -114,6 +115,11 @@ var zingCharter = zingCharter || {};
 		if (sequences[0].dataType && DATATYPE_TO_TRANSFORM[sequences[0].dataType.name])
 		{
 			config.graphset[0]["scale-y"].transform = DATATYPE_TO_TRANSFORM[sequences[0].dataType.name];
+		}
+		
+		if (parsedData.xaxis.dataType === DataType.SCALAR)
+		{
+			delete config.graphset[0].guide;
 		}		
 		
 		zingchart.render({

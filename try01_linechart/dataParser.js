@@ -7,6 +7,7 @@ var dataParser = dataParser || {};
 	TIME: {name: "Time"},
 	DATE_TIME: {name: "DateTime"},
 	SCALAR: {name: "Scalar"},
+	STRING: {name: "String"},
 };
 	
 	var NUMERIC_DATA = {regexp: /^-?\d+(\.\d+)?\s+/, convertor: parseFloat, dataType: DataType.SCALAR};
@@ -14,8 +15,9 @@ var dataParser = dataParser || {};
 	var LONG_DATE_TIME = {regexp: /^[a-zA-Z]{3}\s\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}(\.\d+)?\s+/, convertor: convertLongDateTime, dataType: DataType.DATE_TIME};
 	var SHORT_DATE = {regexp: /^\d{2}\/\d{2}\/\d{4}\s+/, convertor: convertShortDate, dataType: DataType.DATE};
 	var LONG_DATE = {regexp: /^[a-zA-Z]{3}\s+\d{2}\s+\d{4}\s+/, convertor: convertLongDate, dataType: DataType.DATE};
-	var TIME = {regexp: /^\d{2}:\d{2}:\d{2}(\.\d+)?\s+/, convertor: convertTime, dataType: DataType.TIME};	
-	var PARSERS = [NUMERIC_DATA, SHORT_DATE_TIME, LONG_DATE_TIME, SHORT_DATE, LONG_DATE, TIME];
+	var TIME = {regexp: /^\d{2}:\d{2}:\d{2}(\.\d+)?\s+/, convertor: convertTime, dataType: DataType.TIME};
+	var COLUMN_HEADER =  {regexp: /^(\S\s?)+/, convertor: null, dataType: DataType.STRING};
+	var PARSERS = [NUMERIC_DATA, SHORT_DATE_TIME, LONG_DATE_TIME, SHORT_DATE, LONG_DATE, TIME, COLUMN_HEADER];
 	
 	
 	function isNumber(n) 
@@ -128,13 +130,13 @@ var dataParser = dataParser || {};
 	function parseOutputFromAnalysis(data)
 	{
 		var DESCRIPTION_REGEXP = /^\S+/;
-		var COLUMN_HEADER_REGEXP = /^\s+[a-zA-Z]+/;
 		
 		var parsed = {};
 		parsed.xaxis = {};
 		parsed.xaxis.min = Number.MAX_VALUE;
 		parsed.xaxis.max = -Number.MAX_VALUE;
 		parsed.xaxis.dataType = null;
+		parsed.xaxis.headers = [];
 		
 		parsed.sequences = [];
 		
@@ -161,32 +163,46 @@ var dataParser = dataParser || {};
 			var dataForLine = parseDataLine(line);
 			if (dataForLine.values.length > 0) 
 			{
-				parsed.xaxis.dataType = dataForLine.types[0];				
-				parsed.xaxis.min = Math.min(parsed.xaxis.min, dataForLine.values[0]);
-				parsed.xaxis.max = Math.max(parsed.xaxis.max, dataForLine.values[0]);
-				
-				var xvalue = dataForLine.values[0];
-				
-				for (var ctr=1; ctr < dataForLine.values.length; ctr++)
+				if (dataForLine.types[0] === DataType.STRING)  // column headers
 				{
-					if (!parsed.sequences[ctr-1])
-					{
-						parsed.sequences[ctr-1] = {};
-						parsed.sequences[ctr-1].dataPairs = [];
-					}
+					parsed.xaxis.headers.push(dataForLine.values[0]);
 					
-					var seq = parsed.sequences[ctr-1];
-					seq.dataPairs.push([xvalue, dataForLine.values[ctr]]);
-					seq.dataType = dataForLine.types[ctr];
+					for (var ctr=1; ctr < dataForLine.values.length; ctr++)
+					{
+						if (!parsed.sequences[ctr-1])
+						{
+							parsed.sequences[ctr-1] = {};
+							parsed.sequences[ctr-1].dataPairs = [];
+							parsed.sequences[ctr-1].headers = [];
+						}
+						
+						var seq = parsed.sequences[ctr-1];
+						seq.headers.push([dataForLine.values[ctr]]);
+					}
+				}
+				else  // data
+				{
+					parsed.xaxis.dataType = dataForLine.types[0];				
+					parsed.xaxis.min = Math.min(parsed.xaxis.min, dataForLine.values[0]);
+					parsed.xaxis.max = Math.max(parsed.xaxis.max, dataForLine.values[0]);
+					
+					var xvalue = dataForLine.values[0];
+					
+					for (var ctr=1; ctr < dataForLine.values.length; ctr++)
+					{
+						if (!parsed.sequences[ctr-1])
+						{
+							parsed.sequences[ctr-1] = {};
+							parsed.sequences[ctr-1].dataPairs = [];
+							parsed.sequences[ctr-1].headers = [];
+						}
+						
+						var seq = parsed.sequences[ctr-1];
+						seq.dataPairs.push([xvalue, dataForLine.values[ctr]]);
+						seq.dataType = dataForLine.types[ctr];
+					}
 				}
 				
-							
-				continue;
-			}
-			
-			if (COLUMN_HEADER_REGEXP.test(line))
-			{
-				parsed.columnHeaderLines.push(line.trim());
 				continue;
 			}			
 			

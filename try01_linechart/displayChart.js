@@ -12,6 +12,7 @@ $(document).ready(function() {
 		zingCharter.createChart('zingchart', parsed, params);
 	}
 	
-	$.get('short_formatted_longdate_vs_decimal.txt', processData);
+	//$.get('short_formatted_longdate_vs_decimal.txt', processData);
 	//$.get('formatted_dt_vs_decimals.txt', processData);
+	$.get('formatted_decimal_vs_decimal.txt', processData);
 });

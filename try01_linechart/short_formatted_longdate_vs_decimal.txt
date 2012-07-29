@@ -3,7 +3,7 @@ Start Time:  Jun 27 2012 00:00:00.000
 End Time:  later
 Flavor:  Chocolate
 
-   		Date/Time      Value 1.   Value 2
+   		Date/Time      Value 1.   Value of 2nd thing
            (UTC)       (sec)      (sec)
    06/18/2012   7096.252838556    7011.1212
    06/22/2012   7096.101542461    7015.11
