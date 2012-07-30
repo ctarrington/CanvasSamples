@@ -127,6 +127,16 @@ var dataParser = dataParser || {};
 		return dataForLine;
 	}
 	
+	function ensureSequence(parsed, sequenceIndex)
+	{
+		if (!parsed.sequences[sequenceIndex])
+		{
+			parsed.sequences[sequenceIndex] = {};
+			parsed.sequences[sequenceIndex].dataPairs = [];
+			parsed.sequences[sequenceIndex].headers = [];
+		}
+	}
+	
 	function parseOutputFromAnalysis(data)
 	{
 		var DESCRIPTION_REGEXP = /^\S+/;
@@ -169,12 +179,7 @@ var dataParser = dataParser || {};
 					
 					for (var ctr=1; ctr < dataForLine.values.length; ctr++)
 					{
-						if (!parsed.sequences[ctr-1])
-						{
-							parsed.sequences[ctr-1] = {};
-							parsed.sequences[ctr-1].dataPairs = [];
-							parsed.sequences[ctr-1].headers = [];
-						}
+						ensureSequence(parsed, ctr-1);
 						
 						var seq = parsed.sequences[ctr-1];
 						seq.headers.push([dataForLine.values[ctr]]);
@@ -190,12 +195,7 @@ var dataParser = dataParser || {};
 					
 					for (var ctr=1; ctr < dataForLine.values.length; ctr++)
 					{
-						if (!parsed.sequences[ctr-1])
-						{
-							parsed.sequences[ctr-1] = {};
-							parsed.sequences[ctr-1].dataPairs = [];
-							parsed.sequences[ctr-1].headers = [];
-						}
+						ensureSequence(parsed, ctr-1);
 						
 						var seq = parsed.sequences[ctr-1];
 						seq.dataPairs.push([xvalue, dataForLine.values[ctr]]);
