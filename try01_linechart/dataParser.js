@@ -19,6 +19,7 @@ var dataParser = dataParser || {};
 	var COLUMN_HEADER =  {regexp: /^(\S\s?)+/, convertor: null, dataType: DataType.STRING};
 	var PARSERS = [NUMERIC_DATA, SHORT_DATE_TIME, LONG_DATE_TIME, SHORT_DATE, LONG_DATE, TIME, COLUMN_HEADER];
 	
+	var CURRENT_DATE = new Date();
 	
 	function isNumber(n) 
 	{
@@ -54,7 +55,7 @@ var dataParser = dataParser || {};
 	
 	function convertTime(rawvalue)
 	{
-		var d = new Date();		
+		var d = new Date(CURRENT_DATE.getTime());		
 		addTimeToDate(d, rawvalue);						
 		return d.getTime();
 	}

@@ -14,5 +14,6 @@ $(document).ready(function() {
 	
 	//$.get('short_formatted_longdate_vs_decimal.txt', processData);
 	//$.get('formatted_dt_vs_decimals.txt', processData);
-	$.get('formatted_decimal_vs_decimal.txt', processData);
+	//$.get('formatted_decimal_vs_decimal.txt', processData);
+	$.get('formatted_date_vs_times.txt', processData);
 });
