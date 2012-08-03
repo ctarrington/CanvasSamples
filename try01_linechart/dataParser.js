@@ -66,9 +66,9 @@ var dataParser = dataParser || {};
 		
 		if (elements.length >= 3)
 		{
-			date.setHours(parseInt(elements[0]));
-			date.setMinutes(parseInt(elements[1]));
-			date.setSeconds(parseInt(elements[2]));
+			date.setHours(parseInt(elements[0], 10));
+			date.setMinutes(parseInt(elements[1], 10));
+			date.setSeconds(parseInt(elements[2], 10));
 		}
 		
 		if (elements.length == 4)
