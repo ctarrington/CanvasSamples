@@ -113,7 +113,7 @@ var dataParser = dataParser || {};
 			line = line.trim() +' ';  // we need a space at the end of the line, as the regexps use the space as part of the match
 			var data = parseNextData(line);
 								
-			if (!data || !data.value)
+			if (!data || data.value === null)
 			{
 				break;
 			}
