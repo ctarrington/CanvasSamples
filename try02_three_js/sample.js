@@ -13,7 +13,7 @@ function addView(scene, containerElement, params)
 	var far = params.far || 10000;
 	var cameraPosition = params.cameraPosition || {x:0, y:0, z:300};
 	
-	var renderer = new THREE.WebGLRenderer();
+	var renderer = new THREE.WebGLRenderer( { antialias: true } );
 	var camera = new THREE.PerspectiveCamera(viewAngle, aspect, near, far);
 	camera.position = cameraPosition;
 	camera.lookAt(scene.position);
@@ -56,26 +56,52 @@ function addPointLight(scene, params)
 	return pointLight;	
 }
 
-function updatePosition(orbiter)
+function createOrbitAnimation(target, center, radius)
 {
-	orbiter.position.x = 200*Math.cos(updatePosition.theta);
-	orbiter.position.z = 200*Math.sin(updatePosition.theta);
-	updatePosition.theta += Math.PI/100;
+	var animation = {};
+	var theta = 0;
+	animation.tick = function() {
+		target.position.x = center.position.x + radius*Math.cos(theta);
+		target.position.y = center.position.y;
+		target.position.z = center.position.x + radius*Math.sin(theta);
+		$('#positionLabel').html("("+target.position.x+", "+target.position.y+", "+target.position.z+")");
+		theta += Math.PI/100;
+	};	
 	
-	$('#positionLabel').html("("+orbiter.position.x+", "+orbiter.position.y+", "+orbiter.position.z+")");
+	return animation;
 }
-updatePosition.theta = 0;
+
+
+function run()
+{    
+	for (var ctr=0; ctr < animations.length; ctr++)
+	{
+		animations[ctr].tick();
+	}
+	
+	view.render();
+    requestAnimationFrame(run);
+}
 
 var scene = new THREE.Scene();
 
-addSphere(scene, 30, {position: {x:30, y:0, z:30}});
+var animations = [];
+
+var bigSphere = addSphere(scene, 50, {position: {x:30, y:0, z:30}});
 var smallSphere = addSphere(scene, 10, {position: {x:0, y:0, z:200}});
+var tinySphere = addSphere(scene, 5, {position: {x:0, y:0, z:200}});
+
+animations.push(createOrbitAnimation(bigSphere, {position: {x:0, y:0, z:0}}, 20));
+animations.push(createOrbitAnimation(smallSphere, bigSphere, 75));
+animations.push(createOrbitAnimation(tinySphere, smallSphere, 20));
+
+
 
 addPointLight(scene);
-
 var view = addView(scene, $('#container'), {viewAngle: 0, cameraPosition: {x:0, y:0, z:600} });
 
-view.render();
-setInterval(function() {updatePosition(smallSphere); view.render(); }, 25);
+run();
+
+
 	
 });
