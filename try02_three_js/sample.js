@@ -16,6 +16,7 @@ function addView(scene, containerElement, params)
 	var renderer = new THREE.WebGLRenderer();
 	var camera = new THREE.PerspectiveCamera(viewAngle, aspect, near, far);
 	camera.position = cameraPosition;
+	camera.lookAt(scene.position);
 	
 	// add the camera to the scene and the renderer to the container
 	scene.add(camera);
@@ -37,27 +38,44 @@ function addSphere(scene, radius, params)
 	var sphere = new THREE.Mesh(new THREE.SphereGeometry(radius, segments, rings), sphereMaterial);
 	sphere.position = position;
 	scene.add(sphere);
+	
+	return sphere;
 }
+
+function addPointLight(scene, params)
+{
+	params = params || {};
+	
+	var position = params.position || {x:200, y:200, z:500};
+	var color = params.color || 0xFFFFFF; 
+	
+	var pointLight = new THREE.PointLight(color);
+	pointLight.position = position;
+	scene.add(pointLight);
+
+	return pointLight;	
+}
+
+function updatePosition(orbiter)
+{
+	orbiter.position.x = 200*Math.cos(updatePosition.theta);
+	orbiter.position.z = 200*Math.sin(updatePosition.theta);
+	updatePosition.theta += Math.PI/100;
+	
+	$('#positionLabel').html("("+orbiter.position.x+", "+orbiter.position.y+", "+orbiter.position.z+")");
+}
+updatePosition.theta = 0;
 
 var scene = new THREE.Scene();
 
+addSphere(scene, 30, {position: {x:30, y:0, z:30}});
+var smallSphere = addSphere(scene, 10, {position: {x:0, y:0, z:200}});
 
-addSphere(scene, 20, {position: {x:10, y:0, z:0}});
-addSphere(scene, 20, {position: {x:50, y:50, z:50}});
+addPointLight(scene);
 
-// create a point light
-var pointLight =
-  new THREE.PointLight(0xFFFFFF);
+var view = addView(scene, $('#container'), {viewAngle: 0, cameraPosition: {x:0, y:0, z:600} });
 
-// set its position
-pointLight.position.x = 50;
-pointLight.position.y = 50;
-pointLight.position.z = 100;
-
-// add to the scene
-scene.add(pointLight);
-
-var view = addView(scene, $('#container'));
 view.render();
+setInterval(function() {updatePosition(smallSphere); view.render(); }, 25);
 	
 });
