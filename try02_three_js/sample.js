@@ -26,7 +26,7 @@ function addView(scene, containerElement, params)
 	return {render: function() {renderer.render(scene, camera);} };
 }
 
-function addSphere(scene, radius, params)
+function addSphere(parent, radius, params)
 {
 	params = params || {};
 	
@@ -36,10 +36,11 @@ function addSphere(scene, radius, params)
     var position = params.position || {x:0, y:0, z:0};
 
 	var sphere = new THREE.Mesh(new THREE.SphereGeometry(radius, segments, rings), sphereMaterial);
-	sphere.position = position;
-	scene.add(sphere);
 	
-	return sphere;
+	var group = new THREE.Object3D();
+	group.add(sphere);
+	parent.add(group);
+	return group;
 }
 
 function addPointLight(scene, params)
@@ -56,16 +57,14 @@ function addPointLight(scene, params)
 	return pointLight;	
 }
 
-function createOrbitAnimation(target, center, radius)
+function createOrbitAnimation(target, radius, speed)
 {
 	var animation = {};
 	var theta = 0;
 	animation.tick = function() {
-		target.position.x = center.position.x + radius*Math.cos(theta);
-		target.position.y = center.position.y;
-		target.position.z = center.position.x + radius*Math.sin(theta);
-		$('#positionLabel').html("("+target.position.x+", "+target.position.y+", "+target.position.z+")");
-		theta += Math.PI/100;
+		target.position.x = radius*Math.cos(speed*theta);
+		target.position.z = radius*Math.sin(speed*theta);
+		theta += Math.PI/200;
 	};	
 	
 	return animation;
@@ -87,13 +86,12 @@ var scene = new THREE.Scene();
 
 var animations = [];
 
-var bigSphere = addSphere(scene, 50, {position: {x:30, y:0, z:30}});
-var smallSphere = addSphere(scene, 10, {position: {x:0, y:0, z:200}});
-var tinySphere = addSphere(scene, 5, {position: {x:0, y:0, z:200}});
-
-animations.push(createOrbitAnimation(bigSphere, {position: {x:0, y:0, z:0}}, 20));
-animations.push(createOrbitAnimation(smallSphere, bigSphere, 75));
-animations.push(createOrbitAnimation(tinySphere, smallSphere, 20));
+var bigSphere = addSphere(scene, 50, {position: {x:0, y:0, z:0}});
+var smallSphere = addSphere(bigSphere, 20, {position: {x:175, y:0, z:0}});
+var tinySphere = addSphere(smallSphere, 10, {position: {x:50, y:0, z:0}});
+animations.push(createOrbitAnimation(bigSphere, 100, 1));
+animations.push(createOrbitAnimation(smallSphere, 175, 2));
+animations.push(createOrbitAnimation(tinySphere, 50, 4));
 
 
 
