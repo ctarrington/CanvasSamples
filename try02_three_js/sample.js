@@ -2,16 +2,45 @@ var ns = ns || {};
 
 $(document).ready(function() {
 	
+function onMouseDown(evt)
+{
+	evt.preventDefault();
+	
+	// Translate page coords to element coords
+	 
+    var mouseX    = evt.offsetX || evt.clientX;
+    var mouseY    = evt.offsetY || evt.clientY;
+
+    // Translate client coords into viewport x,y
+    var viewX = ( mouseX / window.innerWidth ) * 2 - 1;
+    var viewY = - ( mouseY / window.innerHeight ) * 2 + 1;
+    
+    //console.log('view coordinates = '+viewX+', '+viewY);
+    
+    // build a ray for picking
+    var projector = new THREE.Projector();
+    var vector = new THREE.Vector3( viewX, viewY, .5);
+    projector.unprojectVector( vector, view.camera );
+    var ray = new THREE.Ray( view.camera.position, vector.subSelf( view.camera.position ).normalize() );
+
+    var intersects = ray.intersectObjects( meshes );
+    
+    if (intersects.length > 0)
+    {
+    	console.log('intersects = '+intersects[0].object.name);	
+    }
+}
+	
 function addView(scene, containerElement, params)
 {
 	params = params || {};
-	var width = params.width || 800;
-	var height = params.height || 800;
-	var aspect = width / height;
-	var viewAngle = params.viewAngle || 45;
-	var near = params.near || 0.1;
+	var width   = window.innerWidth;
+    var height  = window.innerHeight;
+    var aspect   = width / height;
+	var viewAngle = params.viewAngle || 70;
+	var near = params.near || 1;
 	var far = params.far || 10000;
-	var cameraPosition = params.cameraPosition || {x:0, y:0, z:300};
+	var cameraPosition = params.cameraPosition || {x:0, y:0, z:1000};
 	
 	var renderer = new THREE.WebGLRenderer( { antialias: true } );
 	var camera = new THREE.PerspectiveCamera(viewAngle, aspect, near, far);
@@ -23,7 +52,10 @@ function addView(scene, containerElement, params)
 	renderer.setSize(width, height);
 	containerElement.append(renderer.domElement);
 	
-	return {render: function() {renderer.render(scene, camera);} };
+	// setup mouse
+	var dom = renderer.domElement;
+	dom.addEventListener( 'mousedown', onMouseDown, false );
+	return {render: function() {renderer.render(scene, camera);}, camera: camera };
 }
 
 function addSphere(parent, params)
@@ -42,10 +74,13 @@ function addSphere(parent, params)
     
     var sphereMaterial = new THREE.MeshPhongMaterial( { map: textureMap } );
 	var sphere = new THREE.Mesh(new THREE.SphereGeometry(radius, segments, rings), sphereMaterial);
+	meshes.push(sphere);
+	sphere.name = 'Sphere Mesh'+radius;
 	
 	var group = new THREE.Object3D();
 	group.rotation.z += Math.PI/4;
 	group.add(sphere);
+	group.name = 'Sphere'+radius;
 	parent.add(group);
 	
 	if (orbitRadius > 0)
@@ -93,6 +128,7 @@ function run()
     requestAnimationFrame(run);
 }
 
+var meshes = [];
 var scene = new THREE.Scene();
 
 var animations = [];
@@ -108,17 +144,17 @@ var sunmap = "../images/SunTexture_2048.png";
 var sunTexture = THREE.ImageUtils.loadTexture(sunmap);
 
 var bigSphere = addSphere(scene, {radius: 50, textureMap: sunTexture, orbitRadius: 0});
-var smallSphere = addSphere(scene, {radius: 25, textureMap: earthTexture, orbitRadius: 300, orbitPeriod:30});
-var tinySphere = addSphere(smallSphere, {radius:10, textureMap: moonTexture, orbitRadius: 50, orbitPeriod: 10});
+var smallSphere = addSphere(scene, {radius: 25, textureMap: earthTexture, orbitRadius: 300, orbitPeriod:60});
+var tinySphere = addSphere(smallSphere, {radius:10, textureMap: moonTexture, orbitRadius: 50, orbitPeriod: 30});
+meshes.reverse();
 
 addPointLight(bigSphere);
 var ambientLight = new THREE.AmbientLight(0x676767);
 scene.add(ambientLight);
 
-var view = addView(scene, $('#container'), {viewAngle: 0, cameraPosition: {x:0, y:0, z:1000} });
+var view = addView(scene, $('#container'));
 
 run();
-
 
 	
 });
