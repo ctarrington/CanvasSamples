@@ -10,16 +10,19 @@ function onMouseDown(evt)
 	 
     var mouseX    = evt.offsetX || evt.clientX;
     var mouseY    = evt.offsetY || evt.clientY;
+    var container = $('#container');
 
     // Translate client coords into viewport x,y
-    var viewX = ( mouseX / window.innerWidth ) * 2 - 1;
-    var viewY = - ( mouseY / window.innerHeight ) * 2 + 1;
+    var viewX = ( mouseX / container.width() ) * 2 - 1;
+    var viewY = - ( mouseY / container.height() ) * 2 + 1;
     
-    //console.log('view coordinates = '+viewX+', '+viewY);
+    console.log('mouse =' +mouseX+', '+mouseY);
+    console.log('ratio = '+(mouseX / container.width())+', '+( mouseY / container.height() ));
+    console.log('view  = '+viewX+', '+viewY);
     
     // build a ray for picking
     var projector = new THREE.Projector();
-    var vector = new THREE.Vector3( viewX, viewY, .5);
+    var vector = new THREE.Vector3( viewX, viewY, 1);
     projector.unprojectVector( vector, view.camera );
     var ray = new THREE.Ray( view.camera.position, vector.subSelf( view.camera.position ).normalize() );
 
@@ -34,8 +37,8 @@ function onMouseDown(evt)
 function addView(scene, containerElement, params)
 {
 	params = params || {};
-	var width   = window.innerWidth;
-    var height  = window.innerHeight;
+	var width   = containerElement.width();
+    var height  = containerElement.height();
     var aspect   = width / height;
 	var viewAngle = params.viewAngle || 70;
 	var near = params.near || 1;
@@ -146,7 +149,6 @@ var sunTexture = THREE.ImageUtils.loadTexture(sunmap);
 var bigSphere = addSphere(scene, {radius: 50, textureMap: sunTexture, orbitRadius: 0});
 var smallSphere = addSphere(scene, {radius: 25, textureMap: earthTexture, orbitRadius: 300, orbitPeriod:60});
 var tinySphere = addSphere(smallSphere, {radius:10, textureMap: moonTexture, orbitRadius: 50, orbitPeriod: 30});
-meshes.reverse();
 
 addPointLight(bigSphere);
 var ambientLight = new THREE.AmbientLight(0x676767);
