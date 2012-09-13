@@ -1,4 +1,4 @@
-var ns = ns || {};
+var cubeSelector = cubeSelector || {};
 
 $(document).ready(function() {
 	
@@ -93,7 +93,7 @@ function addSphere(parent, params)
 	return group;
 }
 
-function addPointLight(parent, params)
+function addPointLight(scene, params)
 {
 	params = params || {};
 	
@@ -102,53 +102,13 @@ function addPointLight(parent, params)
 	
 	var pointLight = new THREE.PointLight(color);
 	pointLight.position = position;
-	parent.add(pointLight);
+	scene.add(pointLight);
 
 	return pointLight;	
 }
 
-function createOrbitAnimation(target, radius, period)
-{
-	var animation = {};
-	animation.tick = function() {
-		var seconds = (new Date()).getTime()/1000;
-		target.position.x = radius*Math.cos(2*Math.PI*seconds/period);
-		target.position.z = radius*Math.sin(2*Math.PI*seconds/period);
-	};	
-	
-	return animation;
-}
-
-
-function run()
-{    
-	for (var ctr=0; ctr < animations.length; ctr++)
-	{
-		animations[ctr].tick();
-	}
-	
-	view.render();
-    requestAnimationFrame(run);
-}
-
 var meshes = [];
 var scene = new THREE.Scene();
-
-var animations = [];
-
-var moonMap = "../images/moon_1024.jpg";
-var moonTexture = THREE.ImageUtils.loadTexture(moonMap);
-
-
-var earthmap = "../images/earth_surface_2048.jpg";
-var earthTexture = THREE.ImageUtils.loadTexture(earthmap);
-
-var sunmap = "../images/SunTexture_2048.png";
-var sunTexture = THREE.ImageUtils.loadTexture(sunmap);
-
-var bigSphere = addSphere(scene, {radius: 50, textureMap: sunTexture, orbitRadius: 0});
-var smallSphere = addSphere(scene, {radius: 25, textureMap: earthTexture, orbitRadius: 300, orbitPeriod:60});
-var tinySphere = addSphere(smallSphere, {radius:10, textureMap: moonTexture, orbitRadius: 50, orbitPeriod: 30});
 
 addPointLight(bigSphere);
 var ambientLight = new THREE.AmbientLight(0x676767);
