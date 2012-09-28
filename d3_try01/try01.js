@@ -7,14 +7,14 @@ $(function() {
 	
 	function updateCircles()
 	{
+		var color = $('input#color').val();
 		var circle = svg.selectAll('circle').data(data);
-		circle.enter().append('circle');
-		circle.exit().remove();
-
-		d3.selectAll("circle")
+		circle.enter().append('circle')
 			.attr("r",  function(d) { return Math.sqrt(2*d.value); })
 			.attr("cy", function(d) { return d.y; } )
-			.attr("cx", function(d) { return d.x; } );
+			.attr("cx", function(d) { return d.x; } )
+			.attr("fill", color);
+		circle.exit().remove();	
 	}
 	
 	function updateList()
