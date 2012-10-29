@@ -25,3 +25,8 @@ div#green {
 div#yellow {
 	background-color: yellow;
 }
+
+div.ghost {
+	background-color: gray;
+	position: absolute;
+}
