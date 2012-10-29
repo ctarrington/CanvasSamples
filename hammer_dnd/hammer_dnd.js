@@ -1,34 +1,47 @@
 $(function() {
 	
+var currentDrag = null;
+
+function writeDebugInfo(event)
+{
+	var buffer = event+' id= '+currentDrag.dragged.id+' originalPosition = ('+currentDrag.originalPosition.x+', '+currentDrag.originalPosition.y+') currentPosition = ('+currentDrag.currentPosition.x+', '+currentDrag.currentPosition.y+')';
+	$('div#results').html(buffer);
+}
+
+function createGhost()
+{
+	
+}
+	
 function doDragStart(evt)
 {
-	var dragged = evt.originalEvent.srcElement;
+	var srcElement = evt.originalEvent.srcElement;
 	
-	if ($(dragged).hasClass('box'))
+	if ( $(srcElement).hasClass('box') && currentDrag == null )
 	{
-		$('div#results').html('start '+evt.originalEvent.srcElement.id);
+		currentDrag = { dragged: evt.originalEvent.srcElement, originalPosition: {x: srcElement.offsetLeft, y: srcElement.offsetTop}, currentPosition: {x: srcElement.offsetLeft, y: srcElement.offsetTop} };
+		createGhost();
+		writeDebugInfo('start');
 	}
 }
 	
 function doDrag(evt)
 {
-	var dragged = evt.originalEvent.srcElement;
+	var srcElement = evt.originalEvent.srcElement;	
 	
-	if ($(dragged).hasClass('box'))
+	
+	if ($(srcElement).hasClass('box') && srcElement === currentDrag.dragged)
 	{
-		$('div#results').html('drag '+dragged.id+ ' x= '+evt.position.x+' y= '+evt.position.y+ ' distanceX= '+evt.distanceX+' distanceY '+evt.distanceY);
+		currentDrag.currentPosition.x = currentDrag.originalPosition.x + evt.distanceX;
+		currentDrag.currentPosition.y = currentDrag.originalPosition.y + evt.distanceY;
+		writeDebugInfo('drag');
 	}
 }
 
 function doDragEnd(evt)
 {
-	$('div#results').html('ended');
-	
-	var dragged = evt.originalEvent.srcElement;
-	
-	if ($(dragged).hasClass('box'))
-	{
-	}
+	writeDebugInfo('end');
+	currentDrag = null;
 }
 	
 var container = $('div#container')[0];
