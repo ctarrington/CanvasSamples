@@ -70,15 +70,29 @@ function createGhost()
 	currentDrag.ghostId = ghostId;
 	
 }
+
+function mouseDragStart(evt)
+{
+	var dbg = 1;
+}
+
+function touchDragStart(evt)
+{
+	var srcElement = evt.originalEvent.srcElement;  
+	
+	var canonicalEvent = {srcElement: srcElement, originalEvent: evt.originalEvent, offset: {left: $(srcElement).offset().left, top: $(srcElement).offset().top}};
+	doDragStart(canonicalEvent);
+}
 	
 function doDragStart(evt)
 {
-	var srcElement = evt.originalEvent.srcElement;
+	var srcElement = evt.srcElement;
 	
 	if ( $(srcElement).hasClass('box') && currentDrag == null )
 	{
 		evt.originalEvent.preventDefault();
-		currentDrag = { dragged: srcElement, originalOffset: {left: $(srcElement).offset().left, top: $(srcElement).offset().top}, currentOffset: {left: $(srcElement).offset().left, top: $(srcElement).offset().top} };
+		evt.originalEvent.stopPropagation;
+		currentDrag = { dragged: srcElement, originalOffset: {left: evt.offset.left, top: evt.offset.top}, currentOffset: {left: evt.offset.left, top: evt.offset.top} };
 		currentDrag.originalDropZone = findDropZone();
 		currentDrag.currentDropZone = currentDrag.originalDropZone;
 		createGhost();
@@ -86,13 +100,24 @@ function doDragStart(evt)
 	}
 }
 	
-function doDrag(evt)
+function touchDrag(evt)
 {
 	if (currentDrag == null)  { return; }
-	evt.originalEvent.preventDefault();
 	
-	currentDrag.currentOffset.left = currentDrag.originalOffset.left + evt.distanceX;
-	currentDrag.currentOffset.top = currentDrag.originalOffset.top + evt.distanceY;
+	
+	var srcElement = evt.originalEvent.srcElement;  
+	
+	var canonicalEvent = {srcElement: srcElement, originalEvent: evt.originalEvent, offset: {left: currentDrag.originalOffset.left + evt.distanceX, top: currentDrag.originalOffset.top + evt.distanceY}};
+	doDrag(canonicalEvent);
+}
+	
+function doDrag(evt)
+{
+	evt.originalEvent.preventDefault();
+	evt.originalEvent.stopPropagation;
+	
+	currentDrag.currentOffset.left = evt.offset.left; 
+	currentDrag.currentOffset.top = evt.offset.top;
 	currentDrag.currentDropZone = findDropZone();
 	
 	var ghost = $('div.ghost');
@@ -113,10 +138,21 @@ function doDrag(evt)
 	writeDebugInfo('drag');
 }
 
+function touchDragEnd(evt)
+{
+	if (currentDrag == null)  { return; }
+	
+	
+	var srcElement = evt.originalEvent.srcElement;  
+	
+	var canonicalEvent = {srcElement: srcElement, originalEvent: evt.originalEvent, offset: {left: currentDrag.originalOffset.left + evt.distanceX, top: currentDrag.originalOffset.top + evt.distanceY}};
+	doDragEnd(canonicalEvent);
+}
+
 function doDragEnd(evt)
 {	
-	if (currentDrag == null)  { return; }
 	evt.originalEvent.preventDefault();
+	evt.originalEvent.stopPropagation;
 	
 	writeDebugInfo('end');
 	if (currentDrag.currentDropZone != null && currentDrag.currentDropZone != currentDrag.originalDropZone)
@@ -133,10 +169,8 @@ function doDragEnd(evt)
 var container = $('div#container')[0];
 var hammer = new Hammer(container);
 
-hammer.ondragstart = doDragStart;
-hammer.ondrag = doDrag;
-hammer.ondragend = doDragEnd;
-
-
+hammer.ondragstart = touchDragStart;
+hammer.ondrag = touchDrag;
+hammer.ondragend = touchDragEnd;
 
 });
