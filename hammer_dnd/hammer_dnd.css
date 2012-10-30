@@ -30,3 +30,7 @@ div.ghost {
 	background-color: gray;
 	position: absolute;
 }
+
+div.ghost.droppable {
+	background-color: #DAD9DE;
+}

@@ -1,10 +1,16 @@
 $(function() {
 	
+	
+$('#clearResults').click(function() {
+	$('div#results').html('');	
+});
+
+
 var currentDrag = null;
 
 function writeDebugInfo(msg)
 {
-	var buffer = ''+msg+' id= '+currentDrag.dragged.id+' originalOffset = ('+currentDrag.originalOffset.left+', '+currentDrag.originalOffset.top+') currentOffset = ('+currentDrag.currentOffset.left+', '+currentDrag.currentOffset.top+')';
+	var buffer = '<p/>'+msg+' id= '+currentDrag.dragged.id+' originalOffset = ('+currentDrag.originalOffset.left+', '+currentDrag.originalOffset.top+') currentOffset = ('+currentDrag.currentOffset.left+', '+currentDrag.currentOffset.top+')';
 	
 	if (currentDrag.originalDropZone != null)
 	{
@@ -23,7 +29,7 @@ function writeDebugInfo(msg)
 		buffer = buffer + '<br/>Drop Zone '+zone.id+ ' (' +zoneLeft+ ', ' +zoneTop+ ')';
 	});
 		
-	$('div#results').html(buffer);
+	$('div#results').append(buffer);
 }
 
 function findDropZone()
@@ -41,13 +47,13 @@ function findDropZone()
 	
 	var match = null;
 	$('.dropZone').each( function(index, zone) {		
-		var zoneWidth = $(zone).width();
-		var zoneHeight = $(zone).height();
 		var zoneLeft = $(zone).offset().left;
+		var zoneRight = zoneLeft + $(zone).width();
 		var zoneTop = $(zone).offset().top;
+		var zoneBottom = zoneTop + $(zone).height();
 				
-		var topLeftInZone = (currentLeft >= zoneLeft && currentLeft <= (zoneLeft+zoneWidth) && currentTop >= zoneTop && currentTop <= (zoneTop+zoneHeight) );
-		var bottomRightInZone = (currentRight >= zoneLeft && currentRight <= (zoneLeft+zoneWidth) && currentBottom >= zoneTop && currentBottom <= (zoneTop+zoneHeight) ); 
+		var topLeftInZone = (currentLeft >= zoneLeft && currentLeft <= zoneRight && currentTop >= zoneTop && currentTop <= zoneBottom );
+		var bottomRightInZone = (currentRight >= zoneLeft && currentRight <= zoneRight && currentBottom >= zoneTop && currentBottom <= zoneBottom ); 
 		if (topLeftInZone && bottomRightInZone)
 		{
 			match = zone;
@@ -72,7 +78,7 @@ function doDragStart(evt)
 	if ( $(srcElement).hasClass('box') && currentDrag == null )
 	{
 		evt.originalEvent.preventDefault();
-		currentDrag = { dragged: evt.originalEvent.srcElement, originalOffset: {left: $(srcElement).offset().left, top: $(srcElement).offset().top}, currentOffset: {left: $(srcElement).offset().left, top: $(srcElement).offset().top} };
+		currentDrag = { dragged: srcElement, originalOffset: {left: $(srcElement).offset().left, top: $(srcElement).offset().top}, currentOffset: {left: $(srcElement).offset().left, top: $(srcElement).offset().top} };
 		currentDrag.originalDropZone = findDropZone();
 		currentDrag.currentDropZone = currentDrag.originalDropZone;
 		createGhost();
@@ -82,34 +88,46 @@ function doDragStart(evt)
 	
 function doDrag(evt)
 {
-	var srcElement = evt.originalEvent.srcElement;	
+	if (currentDrag == null)  { return; }
+	evt.originalEvent.preventDefault();
 	
+	currentDrag.currentOffset.left = currentDrag.originalOffset.left + evt.distanceX;
+	currentDrag.currentOffset.top = currentDrag.originalOffset.top + evt.distanceY;
+	currentDrag.currentDropZone = findDropZone();
 	
-	if ($(srcElement).hasClass('box') && srcElement === currentDrag.dragged)
+	var ghost = $('div.ghost');
+	ghost.offset({ top: currentDrag.currentOffset.top, left: currentDrag.currentOffset.left})
+	
+	if (currentDrag.currentDropZone != null && currentDrag.currentDropZone != currentDrag.originalDropZone )
 	{
-		evt.originalEvent.preventDefault();
-		currentDrag.currentOffset.left = currentDrag.originalOffset.left + evt.distanceX;
-		currentDrag.currentOffset.top = currentDrag.originalOffset.top + evt.distanceY;
-		currentDrag.currentDropZone = findDropZone();
-		
-		var ghost = $('div.ghost');
-		ghost.offset({ top: currentDrag.currentOffset.top, left: currentDrag.currentOffset.left})
-		writeDebugInfo('drag');
+		if (!ghost.hasClass('droppable'))
+		{
+			ghost.addClass('droppable');
+		}
 	}
+	else
+	{
+		ghost.removeClass('droppable');
+	}
+	
+	writeDebugInfo('drag');
 }
 
 function doDragEnd(evt)
-{
-	var srcElement = evt.originalEvent.srcElement;	
+{	
+	if (currentDrag == null)  { return; }
+	evt.originalEvent.preventDefault();
 	
-	
-	if (currentDrag != null)
+	writeDebugInfo('end');
+	if (currentDrag.currentDropZone != null && currentDrag.currentDropZone != currentDrag.originalDropZone)
 	{
-		evt.originalEvent.preventDefault();
-		writeDebugInfo('end');
-		$('div.ghost').remove();		
-		currentDrag = null;
+		$(currentDrag.dragged).detach();
+		$(currentDrag.dragged).appendTo(currentDrag.currentDropZone);
 	}
+	
+	$('div.ghost').remove();		
+	currentDrag = null;
+	
 }
 	
 var container = $('div#container')[0];
