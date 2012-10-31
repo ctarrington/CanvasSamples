@@ -7,6 +7,7 @@ $('#clearResults').click(function() {
 
 
 var currentDrag = null;
+var mouseEvents = null;
 
 function writeDebugInfo(msg)
 {
@@ -71,13 +72,57 @@ function createGhost()
 	
 }
 
-function mouseDragStart(evt)
+
+function preventDefaultMouseDrag(evt)
 {
 	var dbg = 1;
+	evt.preventDefault();
+	evt.stopPropagation;
+}
+
+function mouseDown(evt)
+{	
+	evt.preventDefault();
+	evt.stopPropagation;
+	mouseEvents = {currentTarget: evt.currentTarget};
+}
+
+function mouseMove(evt)
+{
+	evt.preventDefault();
+	evt.stopPropagation;
+	
+	if (mouseEvents != null)
+	{
+		var canonicalEvent = {srcElement: evt.currentTarget, originalEvent: evt, offset: {left: evt.pageX, top: evt.pageY} }; 
+		
+		if (currentDrag == null)
+		{
+			doDragStart(canonicalEvent);
+		}
+		else
+		{
+			doDrag(canonicalEvent);
+		}
+	}
+}
+
+function mouseUp(evt)
+{
+	if (mouseEvents != null)
+	{
+		mouseEvents = null;
+		var canonicalEvent = {srcElement: evt.currentTarget, originalEvent: evt, offset: {left: evt.pageX, top: evt.pageY} };
+		doDragEnd(canonicalEvent);
+	}
+	
+	evt.preventDefault();
+	evt.stopPropagation;
 }
 
 function touchDragStart(evt)
 {
+	if (mouseEvents != null) { return; }
 	var srcElement = evt.originalEvent.srcElement;  
 	
 	var canonicalEvent = {srcElement: srcElement, originalEvent: evt.originalEvent, offset: {left: $(srcElement).offset().left, top: $(srcElement).offset().top}};
@@ -102,6 +147,7 @@ function doDragStart(evt)
 	
 function touchDrag(evt)
 {
+	if (mouseEvents != null) { return; }
 	if (currentDrag == null)  { return; }
 	
 	
@@ -140,6 +186,7 @@ function doDrag(evt)
 
 function touchDragEnd(evt)
 {
+	if (mouseEvents != null) { return; }
 	if (currentDrag == null)  { return; }
 	
 	
@@ -166,6 +213,18 @@ function doDragEnd(evt)
 	
 }
 	
+
+$('div.box').mousedown(mouseDown);
+$('div.box').mousemove(mouseMove);
+$('div#container').mousemove(mouseMove);
+$('div#container').mouseup(mouseUp);
+
+$('div.box').each(function(index, element) {
+	element.addEventListener('dragstart', preventDefaultMouseDrag, false);
+	element.addEventListener('drag', preventDefaultMouseDrag, false);
+});
+
+
 var container = $('div#container')[0];
 var hammer = new Hammer(container);
 
