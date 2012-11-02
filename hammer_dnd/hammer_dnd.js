@@ -30,7 +30,7 @@ function writeDebugInfo(msg)
 		buffer = buffer + '<br/>Drop Zone '+zone.id+ ' (' +zoneLeft+ ', ' +zoneTop+ ')';
 	});
 		
-	$('div#results').append(buffer);
+	//$('div#results').append(buffer);
 }
 
 function findDropZone()
@@ -226,7 +226,7 @@ $('div.box').each(function(index, element) {
 
 
 var container = $('div#container')[0];
-var hammer = new Hammer(container);
+var hammer = new Hammer(container,  {prevent_default: true });
 
 hammer.ondragstart = touchDragStart;
 hammer.ondrag = touchDrag;
