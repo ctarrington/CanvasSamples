@@ -5,6 +5,17 @@ $('#clearResults').click(function() {
 	$('div#results').html('');	
 });
 
+$('#theLink').click(function() {
+    $('div#results').append('Hi There<br/>');
+    return false;
+});
+
+$('#theOutsideLink').click(function() {
+    $('div#results').append('Hi There from the outside<br/>');
+    return false;
+});
+
+
 
 var currentDrag = null;
 var mouseEvents = null;
@@ -75,23 +86,17 @@ function createGhost()
 
 function preventDefaultMouseDrag(evt)
 {
-	var dbg = 1;
-	evt.preventDefault();
-	evt.stopPropagation;
+	//evt.preventDefault();
+	//evt.stopPropagation;
 }
 
 function mouseDown(evt)
-{	
-	evt.preventDefault();
-	evt.stopPropagation;
+{
 	mouseEvents = {currentTarget: evt.currentTarget};
 }
 
 function mouseMove(evt)
 {
-	evt.preventDefault();
-	evt.stopPropagation;
-	
 	if (mouseEvents != null)
 	{
 		var canonicalEvent = {srcElement: evt.currentTarget, originalEvent: evt, offset: {left: evt.pageX, top: evt.pageY} }; 
@@ -115,9 +120,6 @@ function mouseUp(evt)
 		var canonicalEvent = {srcElement: evt.currentTarget, originalEvent: evt, offset: {left: evt.pageX, top: evt.pageY} };
 		doDragEnd(canonicalEvent);
 	}
-	
-	evt.preventDefault();
-	evt.stopPropagation;
 }
 
 function touchDragStart(evt)
@@ -231,5 +233,7 @@ var hammer = new Hammer(container,  {prevent_default: true });
 hammer.ondragstart = touchDragStart;
 hammer.ondrag = touchDrag;
 hammer.ondragend = touchDragEnd;
+
+
 
 });
