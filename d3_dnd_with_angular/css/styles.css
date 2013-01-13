@@ -1,0 +1,45 @@
+div#container {
+    position: absolute;
+    width: 1000px;
+    height: 700px;
+    border: solid black 1px;
+}
+
+div.dropZone {
+    position: absolute;
+	width: 500px;
+	height: 300px;
+	margin: 10px;
+	border: solid black 1px;
+}
+
+div#topDropZone {
+    top: 5px;
+    left: 5px;
+}
+
+div#bottomDropZone {
+    top: 350px;
+    left: 200px;
+}
+
+div.box {
+    position: absolute;
+	width: 100px;
+	height:100px;
+    border: solid black 1px;
+    padding: 3px;
+}
+
+div.boxLabel {
+    position: absolute;
+    width: 100px;
+    height:20px;
+    border: solid black 1px;
+    padding: 3px;
+}
+
+div.boxContent {
+    background-color: white;
+    height: 70%;
+}
