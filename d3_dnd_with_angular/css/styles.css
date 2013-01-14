@@ -7,30 +7,12 @@ div#container {
 
 div.dropZone {
     position: absolute;
-	width: 500px;
-	height: 300px;
-	margin: 10px;
 	border: solid black 1px;
-}
-
-div#topDropZone {
-    top: 5px;
-    left: 200px;
-}
-
-div#bottomDropZone {
-    top: 350px;
-    left: 200px;
 }
 
 div.box {
     position: absolute;
     border: solid black 1px;
-}
-
-div.box.small {
-    width: 150px;
-    height: 130px;
 }
 
 div.boxLabel {
