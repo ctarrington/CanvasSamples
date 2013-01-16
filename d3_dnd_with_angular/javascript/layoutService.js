@@ -21,14 +21,13 @@ angular.module('layout.service', []).
     });
 
     var rawBoxes = [
-        {color:'red', title: 'Thing 1'},
-        {color:'blue', title: 'Thing 2'},
-        {color:'green', title: 'Thing 3'}
+        {title: 'Thing 1'},
+        {title: 'Thing 2'},
+        {title: 'Thing 3'}
     ];
 
     var boxes = rawBoxes.map(function(item, index) {
         var box = {
-            color: item.color,
             title: item.title,
             id: 'boxContent'+index,
             slot: index,
@@ -164,7 +163,6 @@ angular.module('layout.service', []).
         // only on enter (first time through)
         boxDivs.enter().append('div')
             .attr('class', 'box')
-            .style("background-color", function(d) { return d.color; })
             .html(function(d,ctr) {
                 var contentHtml = sprintf('<div id="boxContent%(id)d" class="boxContent" ng-controller="Thing1Ctrl"><input type="text" ng-model="person.name" placeholder="Enter the name" /> {{state}} {{person}} </div>',{id: ctr} );
                 return contentHtml;
@@ -185,10 +183,9 @@ angular.module('layout.service', []).
         // only on enter (first time through)
         labelDivs.enter().append('div')
             .attr('class', 'boxLabel')
-            .style("background-color", function(d) { return d.color; })
             .html(function(d) {
                 var labelHtml = d.title;
-                return labelHtml;
+                return '<span>'+labelHtml+'</span>';
             })
             .call(drag);
 

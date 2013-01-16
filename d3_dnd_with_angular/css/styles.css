@@ -1,29 +1,33 @@
 div#container {
     position: absolute;
-    border: solid black 1px;
 }
 
 div.dropZone {
     position: absolute;
 	border: solid black 1px;
+    background-color: #d3d3d3;
 }
 
 div.box {
     position: absolute;
     border: solid black 1px;
+    background-color: white;
 }
 
 div.boxLabel {
     font-family: arial;
     font-size: 10px;
+    font-weight: bold;
     position: absolute;
     border: solid black 1px;
+    background-color: #d3d3d3;
+}
+
+div.boxLabel span {
+    margin-top: 4px;
+    margin-left: 4px;
 }
 
 div.boxContent {
     background-color: white;
-    height: 87%;
-    width: 92%;
-    margin: 3px;
-    padding: 3px;
 }
