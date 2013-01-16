@@ -2,22 +2,21 @@
 angular.module('layout.service', []).
     value('layoutService', (function() {
 
-        var BIG_WIDTH = 600;
-        var BIG_HEIGHT = 300;
-
-        var SMALL_WIDTH = 170;
-        var SMALL_HEIGHT = 100;
-        var LABEL_HEIGHT = 20;
-        var SPACER = 10;
+    var sizes = {
+                small: {width: 170, height: 100},
+                big: {width: 600, height: 300},
+                label: {height: 20},
+                spacer:{height: 10}
+            };
 
         var idToCallbacksMap = {};
 
         var dropZones = d3.range(0,2).map(function(item, index) {
             return {
                 x: 200,
-                y: index*(BIG_HEIGHT+SPACER),
-                width: BIG_WIDTH,
-                height: BIG_HEIGHT,
+                y: index*(sizes.big.height+sizes.spacer.height),
+                width: sizes.big.width,
+                height: sizes.big.height,
                 currentResident: null
             };
         });
@@ -35,7 +34,8 @@ angular.module('layout.service', []).
                 id: 'boxContent'+index,
                 slot: index,
                 x: 0,
-                y: 0
+                y: 0,
+                z: index
             };
 
             reslot(box);
@@ -54,11 +54,11 @@ angular.module('layout.service', []).
 
             // go to old slot
             box.x = 2;
-            box.y = box.slot*(SMALL_HEIGHT+LABEL_HEIGHT+SPACER);
+            box.y = box.slot*(sizes.small.height+sizes.label.height+sizes.spacer.height);
 
             // get small, real small
-            box.width = SMALL_WIDTH;
-            box.height = SMALL_HEIGHT;
+            box.width = sizes.small.width;
+            box.height = sizes.small.height;
 
             // notify listener
             if (idToCallbacksMap[box.id]) {
@@ -82,7 +82,7 @@ angular.module('layout.service', []).
             box.x = dz.x;
             box.y = dz.y;
             box.width = dz.width;
-            box.height = dz.height;
+            box.height = dz.height-sizes.label.height;
 
             // notify listener
             if (idToCallbacksMap[box.id]) {
@@ -95,14 +95,16 @@ angular.module('layout.service', []).
             .on('drag', doDrag)
             .on('dragend', doDragEnd);
 
-        function doDrag(d) {
-            d.x = d3.event.x;
-            d.y = d3.event.y;
-            idToCallbacksMap[d.id].smallCallback();
+        function doDrag(box) {
+            box.x = d3.event.x;
+            box.y = d3.event.y;
+            box.z = 1000;
+            idToCallbacksMap[box.id].smallCallback();
             updateView();
         }
 
         function doDragEnd(box) {
+            box.z = box.slot;
             var dropZone = findEnclosingDropZone(box);
 
             if (dropZone == null)
@@ -121,10 +123,10 @@ angular.module('layout.service', []).
         function findEnclosingDropZone(box)
         {
             var matches = dropZones.filter(function(dz) {
-                var rightEdgeDz = dz.x+BIG_WIDTH;
-                var bottomEdgeDz = dz.y+BIG_HEIGHT;
-                var rightEdgeBox = box.x + SMALL_WIDTH;
-                var bottomEdgeBox = box.y + SMALL_HEIGHT;
+                var rightEdgeDz = dz.x+sizes.big.width;
+                var bottomEdgeDz = dz.y+sizes.big.height;
+                var rightEdgeBox = box.x + sizes.small.width;
+                var bottomEdgeBox = box.y + sizes.small.height;
 
 
                 var horizontalMatch = (box.x >= dz.x && rightEdgeBox <= rightEdgeDz);
@@ -146,15 +148,16 @@ angular.module('layout.service', []).
         }
 
         function updateView() {
+
             var dropZoneDivs = d3.select("div#container").selectAll("div.dropZone").data(dropZones);
 
             // only on enter (first time through)
             dropZoneDivs.enter().append('div')
                 .attr('class', 'dropZone')
                 .style('top', function(d) { return asPx(d.y); })
-                .style("left", function(d) { return asPx(d.x); })
-                .style("width", function(d) { return asPx(BIG_WIDTH); })
-                .style("height", function(d) { return asPx(BIG_HEIGHT); });
+                .style('left', function(d) { return asPx(d.x); })
+                .style('width', function(d) { return asPx(sizes.big.width); })
+                .style('height', function(d) { return asPx(sizes.big.height); });
 
 
             var boxDivs = d3.select("div#container").selectAll("div.box").data(boxes);
@@ -173,7 +176,8 @@ angular.module('layout.service', []).
                 .style('top', function(d) { var newY = d.y+20; return asPx(newY); })
                 .style("left", function(d) { return asPx(d.x); })
                 .style("width", function(d) { return asPx(d.width); })
-                .style("height", function(d) { return asPx(d.height); });
+                .style("height", function(d) { return asPx(d.height); })
+                .style('z-index', function(d) { return d.z; });
 
 
 
@@ -194,7 +198,8 @@ angular.module('layout.service', []).
                 .style('top', function(d) { return asPx(d.y); } )
                 .style("left", function(d) { return asPx(d.x); } )
                 .style("width", function(d) { return asPx(d.width); })
-                .style("height", function(d) { return asPx(LABEL_HEIGHT); });
+                .style("height", function(d) { return asPx(sizes.label.height); })
+                .style('z-index', function(d) { return d.z; });
 
         }
 
