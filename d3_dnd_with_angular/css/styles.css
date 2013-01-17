@@ -5,7 +5,7 @@ div#container {
 div.dropZone {
     position: absolute;
 	border: solid black 1px;
-    background-color: #d3d3d3;
+    background-color: #EBE8E8;
 }
 
 div.box {

@@ -1,16 +1,16 @@
 angular.module('layout.service', []).
     value('layoutService', (function() {
 
+
+    // establish data
     var sizes = {
         small: {width: 170, height: 100},
         big: {width: 600, height: 300},
-        label: {height: 20},
+        label: {height: 25},
         spacer:{height: 10}
     };
 
-    var idToCallbacksMap = {};
-
-    var dropZones = d3.range(0,2).map(function(item, index) {
+    var largeDropZones = d3.range(0,2).map(function(item, index) {
         return {
             x: 200,
             y: index*(sizes.big.height+sizes.spacer.height),
@@ -20,11 +20,27 @@ angular.module('layout.service', []).
         };
     });
 
+    var smallDropZones = d3.range(0, 3).map(function(item, index) {
+        return {
+            x: 850,
+            y: index*(sizes.small.height+sizes.label.height+sizes.spacer.height),
+            width: sizes.small.width,
+            height: sizes.small.height+sizes.label.height,
+            currentResident: null
+        }
+    });
+
+    var dropZones = largeDropZones.concat(smallDropZones);
+
     var rawBoxes = [
         {title: 'Thing 1'},
         {title: 'Thing 2'},
         {title: 'Thing 3'}
     ];
+
+
+    // set up representation
+    var idToCallbacksMap = {};
 
     var boxes = rawBoxes.map(function(item, index) {
         var box = {
@@ -35,7 +51,6 @@ angular.module('layout.service', []).
             y: 0,
             z: index
         };
-
         reslot(box);
         return box;
     });
@@ -121,10 +136,10 @@ angular.module('layout.service', []).
     function findEnclosingDropZone(box)
     {
         var matches = dropZones.filter(function(dz) {
-            var rightEdgeDz = dz.x+sizes.big.width;
-            var bottomEdgeDz = dz.y+sizes.big.height;
-            var rightEdgeBox = box.x + sizes.small.width;
-            var bottomEdgeBox = box.y + sizes.small.height;
+            var rightEdgeDz = dz.x+dz.width;
+            var bottomEdgeDz = dz.y+dz.height;
+            var rightEdgeBox = box.x + 0.9*sizes.small.width;
+            var bottomEdgeBox = box.y + 0.9*sizes.small.height;
 
 
             var horizontalMatch = (box.x >= dz.x && rightEdgeBox <= rightEdgeDz);
@@ -154,8 +169,8 @@ angular.module('layout.service', []).
             .attr('class', 'dropZone')
             .style('top', function(d) { return asPx(d.y); })
             .style('left', function(d) { return asPx(d.x); })
-            .style('width', function(d) { return asPx(sizes.big.width); })
-            .style('height', function(d) { return asPx(sizes.big.height); });
+            .style('width', function(d) { return asPx(d.width); })
+            .style('height', function(d) { return asPx(d.height); });
 
 
         var boxDivs = d3.select("div#container").selectAll("div.box").data(boxes);
