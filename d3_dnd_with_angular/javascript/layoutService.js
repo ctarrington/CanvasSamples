@@ -38,6 +38,12 @@ angular.module('layout.service', []).
         {title: 'Thing 3'}
     ];
 
+    var dropZoneAssignments = [
+        {boxIndex: 0, dzIndex: 2},
+        {boxIndex: 1, dzIndex: 3},
+        {boxIndex: 2, dzIndex: 4}
+    ]
+
 
     // set up representation
     var idToCallbacksMap = {};
@@ -46,56 +52,59 @@ angular.module('layout.service', []).
         var box = {
             title: item.title,
             id: 'boxContent'+index,
-            slot: index,
+            defaultZ: index,
             x: 0,
             y: 0,
             z: index
         };
-        reslot(box);
         return box;
     });
 
-    function reslot(box)
+    for (var ctr = 0; ctr < dropZoneAssignments.length; ctr++)
     {
-        if (box == null) { return; }
-
-        // move out of old home
-        if (box.currentDropZone != null) {
-            box.currentDropZone.currentResident = null;
-            box.currentDropZone = null;
-        }
-
-        // go to old slot
-        box.x = 2;
-        box.y = box.slot*(sizes.small.height+sizes.label.height+sizes.spacer.height);
-
-        // get small, real small
-        box.width = sizes.small.width;
-        box.height = sizes.small.height;
-
-        // notify listener
-        if (idToCallbacksMap[box.id]) {
-            idToCallbacksMap[box.id].smallCallback();
-        }
+        var assignment = dropZoneAssignments[ctr];
+        var dz = dropZones[assignment.dzIndex];
+        var box = boxes[assignment.boxIndex];
+        occupyDropZone(dz, box);
     }
 
-    function occupyDropZone(dz, box)
+    function fitToDropZone(box)
     {
-        // move out of old home
-        if (box.currentDropZone != null) { box.currentDropZone.currentResident = null; }
-
-        // kick resident out of my new home
-        reslot(dz.currentResident);
-
-        // move into new home
-        dz.currentResident = box;
-        box.currentDropZone = dz;
-
         // fill all space
+        var dz = box.currentDropZone;
         box.x = dz.x;
         box.y = dz.y;
         box.width = dz.width;
         box.height = dz.height-sizes.label.height;
+    }
+
+    // move out of current drop zone and displace the currentResident
+    function occupyDropZone(dz, box)
+    {
+        // stash the current state
+        var oldDz = box.currentDropZone;
+        var displacedBox = dz.currentResident;
+
+
+        // what do we do with the old resident
+        if (oldDz != null && displacedBox == null) // moving from somewhere to empty
+        {
+            oldDz.currentResident = null;
+            dz.currentResident = box;
+            box.currentDropZone = dz;
+            fitToDropZone(box);
+        }
+        else if (oldDz != null && displacedBox != null) // moving to occupied, so switch
+        {
+            oldDz.currentResident = displacedBox;
+            displacedBox.currentDropZone = oldDz;
+            fitToDropZone(displacedBox);
+        }
+
+        // box moves into the the dz
+        dz.currentResident = box;
+        box.currentDropZone = dz;
+        fitToDropZone(box);
 
         // notify listener
         if (idToCallbacksMap[box.id]) {
@@ -117,16 +126,16 @@ angular.module('layout.service', []).
     }
 
     function doDragEnd(box) {
-        box.z = box.slot;
+        box.z = box.defaultZ;
         var dropZone = findEnclosingDropZone(box);
 
-        if (dropZone == null)
+        if (dropZone != null)
         {
-            reslot(box);
+            occupyDropZone(dropZone, box);
         }
         else
         {
-            occupyDropZone(dropZone, box);
+            occupyDropZone(box.currentDropZone, box);
         }
 
         updateView();
@@ -185,7 +194,7 @@ angular.module('layout.service', []).
 
         // every time
         boxDivs
-            .style('top', function(d) { var newY = d.y+20; return asPx(newY); })
+            .style('top', function(d) { var newY = d.y+sizes.label.height; return asPx(newY); })
             .style("left", function(d) { return asPx(d.x); })
             .style("width", function(d) { return asPx(d.width); })
             .style("height", function(d) { return asPx(d.height); })
