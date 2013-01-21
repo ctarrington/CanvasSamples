@@ -8,22 +8,16 @@ function Thing1Ctrl($rootScope, $scope, $element, layoutService) {
         height:0
     };
 
-    $scope.state = 'meh';
+    $scope.sizeInfo = null;
 
 
-    function onSmall()
+    function onSizeChange(info)
     {
         $scope.$apply(function() {
-            $scope.state = 'small';
+            $scope.sizeInfo = info;
         });
     }
 
-    function onBig()
-    {
-        $scope.$apply(function() {
-            $scope.state = 'big';
-        });
-    }
-
-    layoutService.addSizeListeners($element.context.id, onSmall, onBig);
+    layoutService.addSizeListener($element.context.id, onSizeChange);
+    $scope.sizeInfo = layoutService.getSize($element.context.id);
 }

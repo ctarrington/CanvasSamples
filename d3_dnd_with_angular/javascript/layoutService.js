@@ -68,6 +68,22 @@ angular.module('layout.service', []).
         occupyDropZone(dz, box);
     }
 
+    function findBoxById(boxId)
+    {
+        var matches = boxes.filter(function(box) {
+            return (box.id === boxId);
+        });
+
+        return (matches.length > 0) ? matches[0] : null;
+    }
+
+    function notifySizeChangedListeners(box)
+    {
+        if (box != null && idToCallbacksMap[box.id]) {
+            idToCallbacksMap[box.id].sizeChangedCallback({width: box.width, height: box.height});
+        }
+    }
+
     function fitToDropZone(box)
     {
         // fill all space
@@ -106,10 +122,9 @@ angular.module('layout.service', []).
         box.currentDropZone = dz;
         fitToDropZone(box);
 
-        // notify listener
-        if (idToCallbacksMap[box.id]) {
-            idToCallbacksMap[box.id].bigCallback();
-        }
+        // notify listeners
+        notifySizeChangedListeners(box);
+        notifySizeChangedListeners(displacedBox);
     }
 
     var drag = d3.behavior.drag()
@@ -121,7 +136,6 @@ angular.module('layout.service', []).
         box.x = d3.event.x;
         box.y = d3.event.y;
         box.z = 1000;
-        idToCallbacksMap[box.id].smallCallback();
         updateView();
     }
 
@@ -188,7 +202,7 @@ angular.module('layout.service', []).
         boxDivs.enter().append('div')
             .attr('class', 'box')
             .html(function(d,ctr) {
-                var contentHtml = sprintf('<div id="boxContent%(id)d" class="boxContent" ng-controller="Thing1Ctrl"><input type="text" ng-model="person.name" placeholder="Enter the name" /> {{state}} {{person}} </div>',{id: ctr} );
+                var contentHtml = sprintf('<div id="boxContent%(id)d" class="boxContent" ng-controller="Thing1Ctrl"><input type="text" ng-model="person.name" placeholder="Enter the name" /> {{sizeInfo}} {{person}} </div>',{id: ctr} );
                 return contentHtml;
             });
 
@@ -220,17 +234,21 @@ angular.module('layout.service', []).
             .style("width", function(d) { return asPx(d.width); })
             .style("height", function(d) { return asPx(sizes.label.height); })
             .style('z-index', function(d) { return d.z; });
-
     }
 
     updateView();
 
+    // *************************************************
+    // build the service object that is actually exposed
     var serviceObject = {
-        addSizeListeners: function(boxId, smallCallback, bigCallback) {
-            idToCallbacksMap[boxId] = {
-                smallCallback: smallCallback,
-                bigCallback: bigCallback
-            };
+
+        addSizeListener: function(boxId, callback) {
+            idToCallbacksMap[boxId] = { sizeChangedCallback: callback }
+        },
+
+        getSize: function(boxId) {
+            var box = findBoxById(boxId);
+            return {width: box.width, height: box.height };
         }
     };
 
