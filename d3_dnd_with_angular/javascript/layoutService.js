@@ -33,9 +33,9 @@ angular.module('layout.service', []).
     var dropZones = largeDropZones.concat(smallDropZones);
 
     var rawBoxes = [
-        {title: 'Thing 1'},
-        {title: 'Thing 2'},
-        {title: 'Thing 3'}
+        {title: 'Thing 1', controller: 'Thing1Ctrl', partial: 'thing1'},
+        {title: 'Thing 2', controller: 'Thing1Ctrl', partial: 'thing1'},
+        {title: 'Thing 3', controller: 'Thing1Ctrl', partial: 'thing1'}
     ];
 
     var dropZoneAssignments = [
@@ -51,7 +51,10 @@ angular.module('layout.service', []).
     var boxes = rawBoxes.map(function(item, index) {
         var box = {
             title: item.title,
+            controller: item.controller,
+            partial: item.partial,
             id: 'boxContent'+index,
+            index: index,
             defaultZ: index,
             x: 0,
             y: 0,
@@ -201,8 +204,8 @@ angular.module('layout.service', []).
         // only on enter (first time through)
         boxDivs.enter().append('div')
             .attr('class', 'box')
-            .html(function(d,ctr) {
-                var contentHtml = sprintf('<div id="boxContent%(id)d" class="boxContent" ng-controller="Thing1Ctrl"><input type="text" ng-model="person.name" placeholder="Enter the name" /> {{sizeInfo}} {{person}} </div>',{id: ctr} );
+            .html(function(box,ctr) {
+                var contentHtml = sprintf('<div id="%(id)s" class="boxContent" ng-controller="%(controller)s"><div ng-include=" \'partials/%(partial)s.html\' "></div></div>', box );
                 return contentHtml;
             });
 
