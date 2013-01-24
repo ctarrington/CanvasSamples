@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html>
    <head>
-     <title>Three Sample 01</title>
+     <title>Three and D3 Together</title>
      <link rel="stylesheet" type="text/css" href="sample.css" />
      <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
      <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
-     <script type="text/javascript" src="three.js"></script>
-     <script src='sample.js'></script>
+       <script src="http://d3js.org/d3.v3.min.js"></script>
+       <script src="http://d3js.org/topojson.v0.min.js"></script>
+       <script src='three.js'></script>
+       <script src='sample.js'></script>
    </head>
 
   <body>
-    <div id="container"> Container </div>
+    <div id="container"> Three and D3 Together </div>
 
-    <canvas id="hiddenCanvas" width="2048" height="1024" ></canvas>
-    <img id="hiddenEarthImage" src="earth_surface_2048.jpg" />
+    <canvas id="hiddenCanvas" width="960" height="500" ></canvas>
+    <img id="hiddenEarthImage" src="earth_surface_2048.jpg" style="display: none;"/>
 
   </body>
 </html>
