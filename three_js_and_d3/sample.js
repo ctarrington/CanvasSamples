@@ -17,6 +17,25 @@ function addView(scene, containerElement, params)
 	var camera = new THREE.PerspectiveCamera(viewAngle, aspect, near, far);
 	camera.position = cameraPosition;
 	camera.lookAt(scene.position);
+
+    /*controls = new THREE.TrackballControls( camera );
+
+    controls.rotateSpeed = 1.0;
+    controls.zoomSpeed = 1.2;
+    controls.panSpeed = 0.8;
+
+    controls.noZoom = false;
+    controls.noPan = false;
+
+    controls.staticMoving = true;
+    controls.dynamicDampingFactor = 0.3;
+
+    controls.keys = [ 65, 83, 68 ];
+
+    controls.addEventListener( 'change', function() {
+        var dbg = 1;
+        run();
+    } );*/
 	
 	// add the camera to the scene and the renderer to the container
 	scene.add(camera);
@@ -143,6 +162,7 @@ function run()
 	
 	view.render();
     requestAnimationFrame(run);
+    //controls.update();
 }
 
 var width = 1000,
@@ -173,6 +193,7 @@ d3.json("world-110m.json", function(error, worldJson) {
 
 });
 
+var controls = null;
 var earthTexture = new THREE.Texture(mapCanvas);
 
 var meshes = [];
