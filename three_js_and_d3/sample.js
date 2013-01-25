@@ -43,7 +43,7 @@ function addSphere(parent, params)
     var sphereMaterial = new THREE.MeshBasicMaterial({
         map : earthTexture,
         transparent : true,
-        opacity: 0.7,
+        opacity: 0.85,
         blending: THREE.AdditiveAlphaBlending
     });
 	var sphere = new THREE.Mesh(new THREE.SphereGeometry(radius, segments, rings), sphereMaterial);
@@ -80,11 +80,9 @@ function updateTexture(seconds, period)
     longitude = longitude + 1;
     if (longitude > 180) {longitude = -180; }
 
-    var y = height *(1+Math.cos(6*Math.PI*seconds/period))*.5;
-    var x = width * (1+Math.cos(4*Math.PI*seconds/period))*.5;
-    console.log('x = '+x+', y = '+y);
+    latitude = 40*Math.cos(2*Math.PI*seconds/period);
+    latitude = 0;
 
-   // ctx.drawImage($('#hiddenEarthImage')[0], 0,0);
 
     if (countries) {
 
@@ -114,6 +112,8 @@ function updateTexture(seconds, period)
         context.globalAlpha = 0.5;
         context.fill();
 
+        croppedContext.drawImage(rawMapCanvas, deltaLeft, deltaTop, width-deltaWidth, height-deltaHeight, 0,0, width-deltaWidth, height-deltaHeight);
+
         earthTexture.needsUpdate = true;
     }
 }
@@ -128,8 +128,8 @@ function createOrbitAnimation(target, radius, period)
 
 		target.position.x = radius*Math.cos(2*Math.PI*seconds/period);
 		target.position.z = radius*Math.sin(2*Math.PI*seconds/period);
-        //target.rotation.y = 0.35*Math.PI;
         target.rotation.y = 2*Math.PI*seconds/period;
+        //target.rotation.y = 0.35*Math.PI;
 	};	
 	
 	return animation;
@@ -147,17 +147,34 @@ function run()
     requestAnimationFrame(run);
 }
 
-var width = 960,
+var width = 1000,
     height = 500;
 
 var latitude = 0;
 var longitude = 0;
 
 var projection = d3.geo.equirectangular()
-    .scale(153);
+    .scale(150);
 
-var canvas = d3.select("#hiddenCanvas");
-var context = canvas.node().getContext("2d");
+
+var rawMapCanvas = document.createElement('canvas');
+rawMapCanvas.width = width;
+rawMapCanvas.height = height;
+context = rawMapCanvas.getContext("2d");
+//$('#container').append(rawMapCanvas);
+
+var deltaLeft = 10
+    ,deltaRight = 49
+    ,deltaTop = 15
+    ,deltaBotton = 15;
+var deltaWidth = deltaLeft+deltaRight;
+var deltaHeight = deltaTop+deltaBotton;
+
+var croppedCanvas = document.createElement('canvas');
+croppedCanvas.width = width - deltaWidth;
+croppedCanvas.height = height - deltaHeight;
+var croppedContext = croppedCanvas.getContext("2d");
+//$('#container').append(croppedCanvas);
 
 var path = d3.geo.path()
     .projection(projection)
@@ -166,16 +183,17 @@ var path = d3.geo.path()
 var countries = null;
 d3.json("world-110m.json", function(error, worldJson) {
     countries = topojson.object(worldJson, worldJson.objects.countries);
+
 });
 
-var earthTexture = new THREE.Texture($('#hiddenCanvas')[0]);
+var earthTexture = new THREE.Texture(croppedCanvas);
 
 var meshes = [];
 var scene = new THREE.Scene();
 var animations = [];
 
-var bigSphere = addSphere(scene, {radius: 200, orbitRadius: 0});
-var ambientLight = new THREE.AmbientLight(0xababab);
+var bigSphere = addSphere(scene, {radius: 180, orbitRadius: 0});
+var ambientLight = new THREE.AmbientLight(0xffffff);
 scene.add(ambientLight);
 var view = addView(scene, $('#container'));
 
