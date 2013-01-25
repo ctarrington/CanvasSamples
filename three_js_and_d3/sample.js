@@ -112,8 +112,6 @@ function updateTexture(seconds, period)
         context.globalAlpha = 0.5;
         context.fill();
 
-        croppedContext.drawImage(rawMapCanvas, deltaLeft, deltaTop, width-deltaWidth, height-deltaHeight, 0,0, width-deltaWidth, height-deltaHeight);
-
         earthTexture.needsUpdate = true;
     }
 }
@@ -128,7 +126,7 @@ function createOrbitAnimation(target, radius, period)
 
 		target.position.x = radius*Math.cos(2*Math.PI*seconds/period);
 		target.position.z = radius*Math.sin(2*Math.PI*seconds/period);
-        target.rotation.y = 2*Math.PI*seconds/period;
+        //target.rotation.y = 2*Math.PI*seconds/period;
         //target.rotation.y = 0.35*Math.PI;
 	};	
 	
@@ -154,27 +152,16 @@ var latitude = 0;
 var longitude = 0;
 
 var projection = d3.geo.equirectangular()
-    .scale(150);
+    .translate([ width / 2, height / 2])
+    .scale(500 / Math.PI);
 
 
-var rawMapCanvas = document.createElement('canvas');
-rawMapCanvas.width = width;
-rawMapCanvas.height = height;
-context = rawMapCanvas.getContext("2d");
-//$('#container').append(rawMapCanvas);
+var mapCanvas = document.createElement('canvas');
+mapCanvas.width = width;
+mapCanvas.height = height;
+context = mapCanvas.getContext("2d");
+//$('#container').append(mapCanvas);
 
-var deltaLeft = 10
-    ,deltaRight = 49
-    ,deltaTop = 15
-    ,deltaBotton = 15;
-var deltaWidth = deltaLeft+deltaRight;
-var deltaHeight = deltaTop+deltaBotton;
-
-var croppedCanvas = document.createElement('canvas');
-croppedCanvas.width = width - deltaWidth;
-croppedCanvas.height = height - deltaHeight;
-var croppedContext = croppedCanvas.getContext("2d");
-//$('#container').append(croppedCanvas);
 
 var path = d3.geo.path()
     .projection(projection)
@@ -186,7 +173,7 @@ d3.json("world-110m.json", function(error, worldJson) {
 
 });
 
-var earthTexture = new THREE.Texture(croppedCanvas);
+var earthTexture = new THREE.Texture(mapCanvas);
 
 var meshes = [];
 var scene = new THREE.Scene();
