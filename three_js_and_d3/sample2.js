@@ -5,6 +5,9 @@ $(document).ready(function() {
     var container;
     var camera, controls, scene, renderer;
 
+    var threeDeeWidth = 1000
+        ,threeDeeHeight = 800;
+
     var path = null;
     var earthTexture = null;
     var width = 1000,
@@ -12,8 +15,6 @@ $(document).ready(function() {
     var countries = null;
     var longitude = 0
        ,latitude = 0;
-
-    var cross;
 
     init();
     animate();
@@ -84,7 +85,7 @@ $(document).ready(function() {
 
         earthTexture = new THREE.Texture(mapCanvas);
 
-        camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+        camera = new THREE.PerspectiveCamera( 60, threeDeeWidth / threeDeeHeight, 1, 1000 );
         camera.position.z = 500;
 
         controls = new THREE.TrackballControls( camera, $('div#3Dcontainer')[0] );
@@ -104,49 +105,28 @@ $(document).ready(function() {
         controls.addEventListener( 'change', render );
 
         // world
-
-        var earthmap = "earth_surface_2048.jpg";
-        //var earthTexture = THREE.ImageUtils.loadTexture(earthmap);
-
         scene = new THREE.Scene();
 
         var radius = 100;
         var geometry = new THREE.SphereGeometry(radius, 32, 32);
         var material =  new THREE.MeshBasicMaterial({
             map : earthTexture,
-            transparent : true,
-            opacity: 0.85,
             blending: THREE.AdditiveAlphaBlending
         });
 
 
         var mesh = new THREE.Mesh( geometry, material );
-        mesh.position.x = 0;
-        mesh.position.y = 0;
-        mesh.position.z = 0;
-        mesh.updateMatrix();
         mesh.matrixAutoUpdate = false;
         scene.add( mesh );
 
-
-
-
         // lights
-        light = new THREE.DirectionalLight( 0xffffff );
-        light.position.set( 1, 1, 1 );
-        scene.add( light );
-
-        light = new THREE.DirectionalLight( 0x002288 );
-        light.position.set( -1, -1, -1 );
-        scene.add( light );
-
-        light = new THREE.AmbientLight( 0x222222 );
+        light = new THREE.AmbientLight( 0xffffff );
         scene.add( light );
 
 
         // renderer
         renderer = new THREE.WebGLRenderer( { antialias: false } );
-        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setSize( threeDeeWidth, threeDeeHeight );
 
         container = document.getElementById( '3Dcontainer' );
         container.appendChild( renderer.domElement );
@@ -158,10 +138,10 @@ $(document).ready(function() {
 
     function onWindowResize() {
 
-        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.aspect = threeDeeWidth / threeDeeHeight;
         camera.updateProjectionMatrix();
 
-        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setSize( threeDeeWidth, threeDeeHeight );
 
         controls.handleResize();
 
