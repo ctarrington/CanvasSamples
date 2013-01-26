@@ -15,10 +15,13 @@ function addView(scene, containerElement, params)
 	
 	var renderer = new THREE.WebGLRenderer( { antialias: true } );
 	var camera = new THREE.PerspectiveCamera(viewAngle, aspect, near, far);
-	camera.position = cameraPosition;
+	camera.position.x = cameraPosition.x;
+    camera.position.y = cameraPosition.y;
+    camera.position.z = cameraPosition.z;
+
 	camera.lookAt(scene.position);
 
-    /*controls = new THREE.TrackballControls( camera );
+    controls = new THREE.TrackballControls(camera, containerElement[0]);
 
     controls.rotateSpeed = 1.0;
     controls.zoomSpeed = 1.2;
@@ -35,7 +38,7 @@ function addView(scene, containerElement, params)
     controls.addEventListener( 'change', function() {
         var dbg = 1;
         run();
-    } );*/
+    } );
 	
 	// add the camera to the scene and the renderer to the container
 	scene.add(camera);
@@ -49,16 +52,11 @@ function addSphere(parent, params)
 {
 	params = params || {};
 	
-	var segments = (params.segments != null) ? params.segments : 32;
-    var rings = (params.rings != null) ? params.rings : 32;
-    var radius = (params.radius != null) ? params.radius : 10;
-    var orbitRadius = (params.orbitRadius != null) ? params.orbitRadius : 25;
-    var orbitPeriod = (params.orbitPeriod != null) ? params.orbitPeriod : 60;
-    var textureMap = params.textureMap;
-    
-    var geometry = new THREE.SphereGeometry(1, 32, 32);
-    
-    
+	var segments = 32;
+    var rings = 32;
+    var radius = 120;
+
+var geometry = new THREE.SphereGeometry(1, 32, 32);
     var sphereMaterial = new THREE.MeshBasicMaterial({
         map : earthTexture,
         transparent : true,
