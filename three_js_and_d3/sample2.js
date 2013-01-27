@@ -16,8 +16,7 @@ $(document).ready(function() {
     var longitude = 0
        ,latitude = 0;
 
-    init();
-    animate();
+    fetchPrerequisites();
 
     function updateTexture(seconds, period)
     {
@@ -60,8 +59,16 @@ $(document).ready(function() {
         }
     }
 
-    function init() {
+    function fetchPrerequisites()
+    {
+        queue()
+            .defer(d3.json, "world-110m.json")
+            .await(init);
+    }
 
+    function init(error, worldJson) {
+
+        $('#loading').hide();
         var projection = d3.geo.equirectangular()
             .translate([ width / 2, height / 2])
             .scale(500 / Math.PI);
@@ -78,10 +85,8 @@ $(document).ready(function() {
             .projection(projection)
             .context(context);
 
-        d3.json("world-110m.json", function(error, worldJson) {
-            countries = topojson.object(worldJson, worldJson.objects.countries);
 
-        });
+        countries = topojson.object(worldJson, worldJson.objects.countries);
 
         earthTexture = new THREE.Texture(mapCanvas);
 
@@ -125,7 +130,7 @@ $(document).ready(function() {
 
 
         // renderer
-        renderer = new THREE.WebGLRenderer( { antialias: false } );
+        renderer = new THREE.WebGLRenderer( { antialias: true } );
         renderer.setSize( threeDeeWidth, threeDeeHeight );
 
         container = document.getElementById( '3Dcontainer' );
@@ -133,6 +138,8 @@ $(document).ready(function() {
 
 
         window.addEventListener( 'resize', onWindowResize, false );
+
+        animate();
 
     }
 

@@ -4,7 +4,17 @@
 	height: 800px;	
 }
 
-.billboard {
-	z-index: 10;
-	
+#loading {
+    background-color: #d3d3d3;
+    font-weight: bold;
+    font-size: 18px;
+    border: 2px solid black;
+    width: 500px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: center;
+    vertical-align: middle;
+    position: fixed;
+    top: 100px;
+    left: 100px;
 }
