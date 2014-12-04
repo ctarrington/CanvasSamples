@@ -33,4 +33,5 @@ div.ghost {
 
 div.ghost.droppable {
 	background-color: #DAD9DE;
+	width: 100px;
 }
