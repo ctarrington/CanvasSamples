@@ -1,0 +1,23 @@
+html {
+    height: 100%;
+}
+
+body {
+    border: red solid thin;
+    height: 100%;
+}
+
+.container {
+    border: black solid thin;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.greedy {
+    flex-grow: 10;
+}
+
+.passive {
+}
